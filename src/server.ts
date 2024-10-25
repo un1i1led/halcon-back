@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import customerRoutes from './routes/customerRoutes';
 import userRoutes from './routes/userRoutes';
+import orderRoutes from './routes/orderRoutes';
 import cors from 'cors';
 
 config();  
@@ -15,6 +16,7 @@ app.use(cors())
 app.use('/api/auth', authRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/orders', orderRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello, World!');

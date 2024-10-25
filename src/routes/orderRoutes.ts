@@ -7,3 +7,5 @@ router.get('/', isAuthenticated, getAllOrders);
 router.post('/', isAuthenticated, createOrder);
 router.put('/:id', isAuthenticated, updateOrder);
 router.delete('/:id', isAuthenticated, deleteOrder);
+
+export default router;
