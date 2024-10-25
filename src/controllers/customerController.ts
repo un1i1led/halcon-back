@@ -7,7 +7,8 @@ export const getAllCustomers = async (req: Request, res: Response) => {
   const parsedLimit = parseInt(limit as string, 10) || 10;
   const parsedPage = parseInt(page as string, 10) || 1;
   const offset = (parsedPage - 1) * parsedLimit;
-  const search = req.query || '';
+  const search = req.query.search || '';
+
 
   try {
     let whereClause: any = [

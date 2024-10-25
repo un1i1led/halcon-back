@@ -8,14 +8,14 @@ export const getAllOrders = async (req: Request, res: Response) => {
   const parsedLimit = parseInt(limit as string, 10) || 10;
   const parsedPage = parseInt(page as string, 10) || 1;
   const offset = (parsedPage - 1) * parsedLimit;
-  const search = req.query || '';
+  const search = req.query.search || '';
 
   try {
     let whereClause: any = [
       { deleted: false }
     ];
 
-    if (status !== undefined) {
+    if (status && status !== '') {
       whereClause.push({ status });
     }
 
@@ -50,24 +50,27 @@ export const getAllOrders = async (req: Request, res: Response) => {
 }
 
 export const createOrder = async (req: Request, res: Response) => {
-  const { notes, customerNumber } = req.body;
+  const { notes, customerNumber, deliveryAddress } = req.body;
 
   try {
     const customer = await Customer.findOne({ where: { customerNumber } });
     if (!customer) {
       res.status(400).json({ message: 'Este cliente no existe' });
+      return;
     }
 
     const newOrder = await Order.create({
-      deliveryAddress: req.body.deliveryAddress || customer?.address,
+      deliveryAddress: deliveryAddress || customer?.address,
       notes,
       customerNumber,
     })
 
     res.status(200).json(newOrder);
+    return;
   } catch (err: any) {
     console.error(err);
     res.status(500).json({ message: err.message })
+    return;
   }
 }
 
