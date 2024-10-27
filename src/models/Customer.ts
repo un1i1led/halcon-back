@@ -50,9 +50,4 @@ export class Customer extends Model {
     sourceKey: 'customerNumber'
   })
   orders!: Order[];
-
-  @BeforeCreate
-  static async generateCustomerNumber(customer: Customer) {
-    customer.customerNumber = `${Math.floor(100000 + Math.random() * 900000)}`;
-  }
 }

@@ -56,11 +56,15 @@ export const createCustomer = async (req: Request, res: Response) => {
       return;
     }
 
+    const customerNumber = `${Math.floor(100000 + Math.random() * 900000)}`;
+    console.log(customerNumber);
+
     const newCustomer = await Customer.create({
       name, 
       fiscalData,
       address,
-      phone
+      phone,
+      customerNumber
     });
 
     res.status(200).json(newCustomer);
