@@ -26,6 +26,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
 
     const { count, rows: users } = await User.findAndCountAll(({
       where: whereClause,
+      attributes: { exclude: ['password'] },
       parsedLimit,
       offset
     }) as any);
