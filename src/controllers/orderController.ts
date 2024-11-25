@@ -36,7 +36,7 @@ export const getAllOrders = async (req: Request, res: Response) => {
 
     const { count, rows: orders } = await Order.findAndCountAll(({
       where: whereClause,
-      parsedLimit,
+      limit: parsedLimit,
       offset,
       include: [
         { model: Customer },
