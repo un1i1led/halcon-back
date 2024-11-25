@@ -2,6 +2,11 @@ import { Request, Response } from 'express';
 import { Op } from 'sequelize';
 import { Order } from '../models/Order';
 import { Customer } from '../models/Customer';
+import { Image } from '../models/Image';
+
+interface MulterRequest extends Request {
+  file?: Express.Multer.File;
+}
 
 export const getAllOrders = async (req: Request, res: Response) => {
   const { page, limit, status } = req.query;
@@ -32,7 +37,11 @@ export const getAllOrders = async (req: Request, res: Response) => {
     const { count, rows: orders } = await Order.findAndCountAll(({
       where: whereClause,
       parsedLimit,
-      offset
+      offset,
+      include: [
+        { model: Customer },
+        { model: Image }
+      ]
     }) as any);
 
     res.status(200).json({
@@ -101,14 +110,23 @@ export const createOrder = async (req: Request, res: Response) => {
 
 export const updateOrder = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { notes, customerNumber, deliveryAddress } = req.body;
+  const { notes, customerNumber, deliveryAddress, status } = req.body;
 
   try {
-    const updatedOrder = await Order.update({
+    await Order.update({
       notes,
       customerNumber,
-      deliveryAddress
+      deliveryAddress,
+      status
     }, { where: { id } })
+
+    const updatedOrder = await Order.findOne({ 
+      where: { id },
+      include: [
+        { model: Customer },
+        { model: Image }
+      ]
+    });
 
     res.status(200).json(updatedOrder);
     return;
@@ -131,5 +149,42 @@ export const deleteOrder = async (req: Request, res: Response) => {
   } catch (err: any) {
     res.status(500).json({ message: err.message })
     return;
+  }
+}
+
+export const uploadOrderImage = async (req: MulterRequest, res: Response) => {
+  try {
+      if (!req.file) {
+        res.status(400).json({ message: 'No hay archivo'});
+        return;
+      }
+      
+      const { path } = req.file;
+      const { id } = req.params;
+      const { description } = req.body;
+      
+      await Image.create({
+          imageUrl: path,
+          description,
+          orderId: id,
+      });
+
+      await Order.update({
+        status: description === 'loaded' ? 'In route' : 'Delivered'
+      }, { where: { id } });
+
+      const updatedOrder = await Order.findOne({
+        where: { id },
+        include: [
+          { model: Customer },
+          { model: Image }
+        ]
+      })
+      
+      res.status(201).json({ message: 'Image saved successfully', order: updatedOrder});
+      return;
+  } catch (error) {
+      res.status(500).json({ message: 'Error saving image'});
+      return;
   }
 }
